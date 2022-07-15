@@ -2,33 +2,29 @@ const { ApolloServer } = require("apollo-server");
 const fs = require("fs");
 const path = require("path");
 const { PrismaClient } = require("@prisma/client");
+const { getUserId } = require("./utils");
+const Query = require("./resolvers/Query");
+const Mutation = require("./resolvers/Mutation");
+const User = require("./resolvers/User");
+const Link = require("./resolvers/Link");
 
 const resolvers = {
-  Query: {
-    info: () => null,
-    feed: async (parents, args, context) => {
-      return context.prisma.link.findMany();
-    },
-  },
-  Mutation: {
-    post: (parents, args, context, info) => {
-      const newLink = context.prisma.link.create({
-        data: {
-          url: args.url,
-          description: args.description,
-        },
-      });
-      return newLink;
-    },
-  },
+  Query,
+  Mutation,
+  User,
+  Link,
 };
 
 const prisma = new PrismaClient();
 const server = new ApolloServer({
   typeDefs: fs.readFileSync(path.join(__dirname, "schema.graphql"), "utf8"),
   resolvers,
-  context: {
-    prisma,
+  context: ({ req }) => {
+    return {
+      ...req,
+      prisma,
+      userId: req && req.headers.authorization ? getUserId(req) : null,
+    };
   },
 });
 

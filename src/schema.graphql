@@ -13,6 +13,7 @@ type Link {
   description: String!
   url: String!
   postedBy: User
+  votes: [Vote]!
 
 }
 type AuthPayload {
@@ -24,4 +25,12 @@ type User {
   name: String!
   email: String!
   links: [Link!]!
+}
+type Subscription {
+  newLink: Link
+}
+type Vote {
+  id: ID!
+  link: Link!
+  user: User!
 }
